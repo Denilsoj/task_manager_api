@@ -243,7 +243,7 @@ Response:
 
 #### GET <http://127.0.0.1:8000/tasks/>
 
-***Buscando todas as tarefas criadas ao usuário autenticado**
+***Buscando todas as tarefas criadas pelo usuário autenticado**
 
 Response:
 
