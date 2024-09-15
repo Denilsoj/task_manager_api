@@ -92,6 +92,8 @@ Response:
 
 #### PUT <http://127.0.0.1:8000/users/1/>
 
+ ***Observações:** Só pode atualizar o valor do campo password
+
   Forneça o id do usuário na rota: "**/1/**"
 
   Body:
