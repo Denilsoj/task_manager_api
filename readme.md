@@ -411,16 +411,5 @@ Response:
 
         {
             "detail": "Task deleted"
-        }{
-                "id": 2,
-                "title": "Trabalho de Matemática",
-                "description": "",
-                "date": "2024-09-13",
-                "time_start": "00:00:00",
-                "time_end": "23:59:59",
-                "google_event_id": "k0h0j9lmrgkmeo302f7vn49jo8",
-                "user": {
-                    "id": 1,
-                    "username": "denilson"
-                }
-            }
+        }
+            
