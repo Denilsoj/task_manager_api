@@ -10,8 +10,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Task
 from .serializers import TaskSerializer
-from .google_calendar import create_google_calendar_event, delete_google_calendar_event
-
+from .google_calendar import Manage_google_calendar_event
+from .serializers import UserSerializer
+from .permissions import IsAdminOrReadOnly
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -37,6 +38,8 @@ class TaskViewSet(viewsets.ModelViewSet):
             start_date = parse_date(start_date)
             end_date = parse_date(end_date)
             queryset = queryset.filter(date__range=[start_date, end_date])
+        
+        print(end_date)
 
         
         if title:
@@ -46,7 +49,6 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     
     def create(self, request, *args, **kwargs):
-    
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -56,19 +58,26 @@ class TaskViewSet(viewsets.ModelViewSet):
             raise ValidationError({"detail": "You already have a task with this title."})
         
         task_data = serializer.data
+
+        if not task_data['time_start'] or not task_data['time_end'] or not task_data['description']:
+            task_data['time_start'] = '00:00:00'
+            task_data['time_end'] = '23:59:59'
+            task_data['description'] = ''
+            
+        
         event_data = {
             'title': task_data['title'],
-            'description': task_data['description'],
-            'start': f"{task_data['date']}T{task_data['time']}",
-            'end': f"{task_data['date']}T{task_data['time_end']}",
+            'description': task_data.get('description', ''),
+            'start': f"{task_data['date']}T{task_data.get('time_start' )}",
+            'end': f"{task_data['date']}T{task_data.get('time_end')}",
         }
 
         try:
           
-            event_result = create_google_calendar_event(event_data)            
-            task.google_event_id = event_result.get('id', None)
+            event_result = Manage_google_calendar_event.create(event_data)            
+            task.google_event_id = event_result.get('event_id', None)
+            task_data['google_event_id'] = event_result.get('event_id', None)
             task.save()
-            serializer = self.get_serializer(task)
         except Exception as e:
            
             return Response({
@@ -77,11 +86,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
        
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        
-        
-
+        return Response(task_data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -90,15 +95,20 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         if google_event_id:
             try:
-                delete_google_calendar_event(google_event_id)
+                Manage_google_calendar_event.delete(google_event_id)
             except Exception as e:
                 
-                return Response({"detail": "Erro ao deletar evento no Google Calendar", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"detail": "Error when deleting event from Google Calendar.", "error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            "detail": "Task deleted"
+        }, status=status.HTTP_200_OK)
 
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny, IsAdminOrReadOnly]
 
-    
         
