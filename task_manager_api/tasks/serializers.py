@@ -25,8 +25,20 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password']) 
         user.save()
- 
         return user
+    
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        if password:
+            instance.set_password(password)
+      
+        for field in ['username', 'email', 'first_name', 'last_name']:
+            if field in validated_data:
+                validated_data.pop(field) 
+
+        return super().update(instance, validated_data)
+        
+        
 class UserLimitedSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -41,5 +53,17 @@ class TaskSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'title': {'required': True},
             'date': {'required': True},
+            'google_event_id': {'read_only': True}
             
         }
+    def validate(self, data):
+       
+        time_start = data.get('time_start')
+        time_end = data.get('time_end')
+
+        if time_start and time_end and time_start == time_end:
+            raise serializers.ValidationError({
+                'time_end': 'time_start and time_end cannot be the same.'
+            })
+
+        return data
