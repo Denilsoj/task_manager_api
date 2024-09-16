@@ -32,7 +32,7 @@ O taskManagerAPI trata-se de uma **API** (**Interface de programação de aplica
 6. Clone o repositório: **git clone** <https://github.com/Denilsoj/task_manager_api.git>;
 7. Mova o arquivo credentials.json para o diretório /task_manager/task_manager_api/tasks/auth;
 8. Crie um ambiente virtual: **python3 -m venv venv**;
-9. Ative o ambiente virtual: **source venv/bin/activate**;
+9. Ative o ambiente virtual: **No linux e mac: source venv/bin/activate, no windows: venv\Scripts\activate**;
 10. Entre na pasta do projeto **cd task_manage_api**
 11. Baixe as dependencias: **pip install -r requirements.txt**;
 12. Faça as migrações da sua base de dados: **python task_manager_api/manage.py migrate**
