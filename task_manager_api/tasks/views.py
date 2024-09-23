@@ -59,12 +59,12 @@ class TaskViewSet(viewsets.ModelViewSet):
         
         task_data = serializer.data
 
-        if not task_data['time_start'] or not task_data['time_end'] or not task_data['description']:
+        if not task_data['time_start'] or not task_data['time_end']:
             task_data['time_start'] = '00:00:00'
             task_data['time_end'] = '23:59:59'
-            task_data['description'] = ''
-            
-        
+
+
+
         event_data = {
             'title': task_data['title'],
             'description': task_data.get('description', ''),
